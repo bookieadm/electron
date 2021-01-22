@@ -1,0 +1,154 @@
+; Turn off old selected section
+; 12 06 2005: Luis Wong
+; Template to generate an installer
+; Especially for the generation of EasyPlayer installers
+; Trimedia Interactive Projects
+ 
+; -------------------------------
+; Start
+  Name bookmakerrating.stakers.com 
+  !define MUI_PRODUCT "bookmakerrating.stakers.com"
+  !define MUI_FILE "Stakers_Bookmakerrating"
+  !define MUI_VERSION "1.0.0"
+  !define MUI_BRANDINGTEXT "bookmakerrating.stakers.com"
+  CRCCheck On
+ 
+  ; We should test if we must use an absolute path 
+  !include "${NSISDIR}\Contrib\Modern UI\System.nsh"
+ 
+ 
+;---------------------------------
+;General
+ 
+  OutFile "bookmakerrating_setup.exe"
+  ShowInstDetails "nevershow"
+  ShowUninstDetails "nevershow"
+  ;SetCompressor "bzip2"
+ 
+  !define MUI_ICON "icon.ico"
+  !define MUI_UNICON "icon.ico"
+  !define MUI_SPECIALBITMAP "Bitmap.bmp"
+ 
+ 
+;--------------------------------
+;Folder selection page
+ 
+  InstallDir "$PROGRAMFILES\${MUI_PRODUCT}"
+ 
+ 
+;--------------------------------
+;Modern UI Configuration
+
+  !include Sections.nsh
+ 
+  !define MUI_WELCOMEPAGE  
+  !define MUI_LICENSEPAGE
+  !define MUI_DIRECTORYPAGE
+  !define MUI_ABORTWARNING
+  !define MUI_UNINSTALLER
+  !define MUI_UNCONFIRMPAGE
+  !define MUI_FINISHPAGE  
+ 
+ 
+;--------------------------------
+;Language
+  !insertmacro MUI_PAGE_WELCOME
+  !insertmacro MUI_PAGE_DIRECTORY
+  !insertmacro MUI_PAGE_INSTFILES
+  !insertmacro MUI_LANGUAGE "English"
+ 
+ 
+;-------------------------------- 
+;Modern UI System
+ 
+ 
+;--------------------------------
+;Data
+ 
+  LicenseData "LICENSE"
+ 
+ 
+;-------------------------------- 
+;Installer Sections     
+Section -install SEC0000
+ 
+;Add files
+  SetOutPath "$INSTDIR"
+ 
+  File "${MUI_FILE}.exe"
+  File "chrome_100_percent.pak"
+  File "chrome_200_percent.pak"
+  File "d3dcompiler_47.dll"
+  File "ffmpeg.dll"
+  File "icudtl.dat"
+  File "libEGL.dll"
+  File "libGLESv2.dll"
+  File "LICENSE"
+  File "LICENSES.chromium.html"
+  File "resources.pak"
+  File "snapshot_blob.bin"
+  File "Squirrel.exe"
+  File "Stakers_Bookmakerrating.exe"
+  File "v8_context_snapshot.bin"
+  File "version"
+  File "vk_swiftshader.dll"
+  File "vk_swiftshader_icd.json"
+  File "vulkan-1.dll"
+  file /r swiftshader
+  file /r locales
+  file /r resources
+ 
+;create desktop shortcut
+  CreateShortCut "$DESKTOP\${MUI_PRODUCT}.lnk" "$INSTDIR\${MUI_FILE}.exe" ""
+ 
+;create start-menu items
+  CreateDirectory "$SMPROGRAMS\${MUI_PRODUCT}"
+  CreateShortCut "$SMPROGRAMS\${MUI_PRODUCT}\Uninstall.lnk" "$INSTDIR\Uninstall.exe" "" "$INSTDIR\Uninstall.exe" 0
+  CreateShortCut "$SMPROGRAMS\${MUI_PRODUCT}\${MUI_PRODUCT}.lnk" "$INSTDIR\${MUI_FILE}.exe" "" "$INSTDIR\${MUI_FILE}.exe" 0
+ 
+;write uninstall information to the registry
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${MUI_PRODUCT}" "DisplayName" "${MUI_PRODUCT} (remove only)"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${MUI_PRODUCT}" "UninstallString" "$INSTDIR\Uninstall.exe"
+ 
+  WriteUninstaller "$INSTDIR\Uninstall.exe"
+ 
+SectionEnd
+ 
+ 
+;--------------------------------    
+;Uninstaller Section  
+Section "Uninstall"
+ 
+;Delete Files 
+  RMDir /r "$INSTDIR\*.*"    
+ 
+;Remove the installation directory
+  RMDir "$INSTDIR"
+ 
+;Delete Start Menu Shortcuts
+  Delete "$DESKTOP\${MUI_PRODUCT}.lnk"
+  Delete "$SMPROGRAMS\${MUI_PRODUCT}\*.*"
+  RmDir  "$SMPROGRAMS\${MUI_PRODUCT}"
+ 
+;Delete Uninstaller And Unistall Registry Entries
+  DeleteRegKey HKEY_LOCAL_MACHINE "SOFTWARE\${MUI_PRODUCT}"
+  DeleteRegKey HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${MUI_PRODUCT}"  
+ 
+SectionEnd
+ 
+ 
+;--------------------------------    
+;MessageBox Section
+ 
+ 
+;Function that calls a messagebox when installation finished correctly
+Function .onInstSuccess
+  MessageBox MB_OK "You have successfully installed ${MUI_PRODUCT}. Use the desktop icon to start the program."
+FunctionEnd
+ 
+Function un.onUninstSuccess
+  MessageBox MB_OK "You have successfully uninstalled ${MUI_PRODUCT}."
+FunctionEnd
+ 
+ 
+;eof
